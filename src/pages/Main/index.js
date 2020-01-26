@@ -4,14 +4,15 @@ import { Link } from 'react-router-dom';
 
 import api from '../../services/api';
 
-import { Form, SubmitButton, List } from './styles';
+import { Form, SubmitButton, List, MsgError } from './styles';
 import Container from '../../components/Container';
 
 export default class  Main extends Component {
     state = {
         newRepo: '',
         repositories: [],
-        loading: false
+        loading: false,
+        error: false
     }
 
     componentDidMount(){
@@ -36,20 +37,34 @@ export default class  Main extends Component {
         this.setState({ loading: true});
         const { newRepo, repositories } = this.state;
         e.preventDefault();
-        const response = await api.get(`/repos/${newRepo}`);
-        const data = {
-            name: response.data.full_name
-        };
+        try{
+            const response = await api.get(`/repos/${newRepo}`);
+            const data = {
+                name: response.data.full_name
+            };
 
-        this.setState({
-            repositories: [...repositories, data],
-            newRepo: '',
-            loading: false
-        });
+            this.setState({
+                repositories: [...repositories, data],
+                newRepo: '',
+            });
+        }catch(err){
+            this.setState({
+                error: true,
+            });
+            setTimeout(() => {
+                this.setState({
+                    error: false,
+                });
+            }, 5000);
+        }finally{
+            this.setState({
+                loading: false,
+            })
+        }
     }
 
     render(){
-        const { newRepo, loading, repositories } = this.state;
+        const { newRepo, loading, repositories, error } = this.state;
 
         return (
             <Container>
@@ -68,6 +83,14 @@ export default class  Main extends Component {
                         }
                     </SubmitButton>
                 </Form>
+
+                {
+                    error ?
+                    <MsgError>
+                        Repositório não encontrado
+                    </MsgError> :
+                    null
+                }
 
                 <List>
                     { repositories.map(repository => (

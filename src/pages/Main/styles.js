@@ -71,3 +71,9 @@ export const List = styled.ul`
         }
     }
 `;
+
+export const MsgError = styled.span`
+    display: block;
+    margin-top: 5px;
+    color: red;
+`;
